@@ -21,9 +21,37 @@ class tree {
         void preorder_r(node *);
         void postorder_r();
         void postorder_r(node *);
-
+        void inorder_nr();
+        void preorder_nr();
+        void postorder_nr();
 };
 
+class stack {
+    int top;
+    node *data[25];
+    public:
+        stack()
+        {
+            top = -1;
+        }
+    void push(node *);
+    node *pop();
+    int empty();
+    friend class tree;
+};
+
+void stack :: push(node *t)
+{
+    top++;
+    data[top] = t;
+}
+
+node* stack :: pop()
+{
+    node *popped = data[top];
+    top--;
+    return popped;
+}
 
 void tree :: create_r() {
     root = new node();
@@ -119,6 +147,24 @@ void tree::create_nr()
     
 }
 
+void tree :: inorder_nr()
+{
+    stack st;
+    node *temp = root;
+    while(1) {
+        while (temp != NULL) {
+            st.push(temp);
+            temp = temp->left;
+        }
+        if (st.top == -1) {
+            break;
+        }
+        temp = st.pop();
+        cout<<temp->data<<" ";
+        temp=temp->right;
+    }
+}
+
 
 void tree :: inorder_r()
 {
@@ -135,6 +181,24 @@ void tree :: inorder_r(node *temp)
     }
 }
 
+void tree :: preorder_nr()
+{
+    stack st;
+    node *temp = root;
+    while(1) {
+        while (temp != NULL) {
+            cout<<temp->data<<" ";
+            st.push(temp);
+            temp = temp->left;
+        }
+        if (st.top == -1) {
+            break;
+        }
+        temp = st.pop();
+        temp=temp->right;
+    }
+}
+
 
 void tree :: preorder_r()
 {
@@ -148,6 +212,35 @@ void tree :: preorder_r(node *temp)
         cout<<temp->data<<"\t";
         preorder_r(temp->left);
         preorder_r(temp->right);
+    }
+}
+
+void tree :: postorder_nr()
+{
+    stack st;
+    node *temp = root;
+    while(1)
+    {
+        while(temp != NULL)
+        {
+            st.push(temp);
+            temp=temp->left;
+        }
+        if (st.data[st.top]->right == NULL)
+        {
+            temp = st.pop();
+            cout<<temp->data<<" ";
+        }
+        while (st.top != -1 && st.data[st.top]->right == temp)
+        {
+            temp = st.pop();
+            cout<<temp->data<<" ";
+        }
+        if (st.top == -1) 
+        {
+            break;
+        }
+        temp = st.data[st.top]->right;
     }
 }
 
@@ -178,7 +271,10 @@ int main()
         cout<<"\n3.Inorder Traversal(Recursive)";
         cout<<"\n4.Preorder Traversal(Recursive)";
         cout<<"\n5.Postorder Traversal(Recursive)";
-        cout<<"\n6.Exit";
+        cout<<"\n6.Inorder Traversal(Non-Recursive)";
+        cout<<"\n7.Preorder Traversal(Non-Recursive)";
+        cout<<"\n8.Postorder Traversal(Non-Recursive)";
+        cout<<"\n9.Exit";
         cout<<"\nEnter your choice: ";
         cin>>option;
         switch(option)
@@ -204,6 +300,18 @@ int main()
                 break;
             
             case 6:
+                bt.inorder_nr();
+                break;
+                
+            case 7:
+                bt.preorder_nr();
+                break;
+                
+            case 8:
+                bt.postorder_nr();
+                break;
+                
+            case 9:
                 return 0;
                 
             default:
@@ -211,5 +319,6 @@ int main()
                 break;
         }
     }
-    while(option != 6);
+    while(option != 9);
+
 }
