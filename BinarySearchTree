@@ -1,137 +1,300 @@
-#include<iostream>
-#include<string.h>
+#include <iostream>
+#include <string>
+#include <queue>
+
 using namespace std;
-class treenode
-{
-    char keyword [10]; char meaning [10];
-	treenode *left;
-	treenode *right;
-	friend class tree;
-	
+
+class node {
+    string word;
+    string meaning;
+    node *left;
+    node *right;
+
+    friend class tree;
+
 };
 
-class tree
-{
-	treenode *root;
-	public:
-		tree();
-		void create_nr();
-		void inorder_r();
-        void inorder_r(treenode *);
+
+class tree {
+    node *root;
+public:
+    tree();
+
+    void create();
+
+    void inOrder();
+
+    void inOrder(node *);
+
+    void levelWise();
+
+    void levelWise(node *);
+
+   
+    node *copy();
+
+    node *copy(node *);
+
+    void mirror();
+
+    void mirror(node *);
+
+    void deletion();
+
+    void deletion_util(string);
+
+    void searchKey(node **, string, node **);
 };
 
-tree::tree()
-{
-	root = NULL;
+
+tree::tree() {
+    root = NULL;
 }
 
-void tree::create_nr()
-{
-	treenode *temp,*curr;
-	int flag;
-	char ch1,ch2;
-	
-	if(root == NULL)
-	{
-		root = new treenode;
-		root->left = NULL;
-		root->right = NULL;
-		
-		cout <<"\nEnter Keyword:-";
-		cin >>root->keyword;
-		cout <<"\nEnter meaning:-";
-		cin >>root->meaning;
-		
-	}
-	do
-	{
-	    
-		flag = 0;
-		temp = root;
-		
-		curr = new treenode;
-		curr->left = NULL;
-		curr->right = NULL;
-		
-		cout<< "\nEnter Keyword:-";
-		cin>>curr->keyword;
-		cout<< "\nEnter meaning:-";
-		cin>>curr->meaning;
-		while(flag == 0)
-		{
-			if(temp->keyword>curr->keyword)
-			{
-				if(temp->left == NULL)
-				{
-					temp->left=curr;
-					flag=1;
-				}
-				temp=temp->left;
-			} 
-			else 
-			{
-				if(temp->keyword < curr->keyword)
-				{
-					if(temp->right == NULL)
-					{
-						temp->right = curr;
-						flag=1;
-					}
-					temp = temp->right;
-				}
-				
-			}
-		}
-		cout<<"\nDo you continue(y/n):-";
-		cin>>ch2;
-		
-	}while(ch2 == 'y'|| ch1 == 'Y');
+void tree::create() {
+    root = new node();
+    cout << "\nEnter Word for the root: ";
+    cin >> root->word;
+    cout << "\nEnter corresponding meaning of the word: ";
+    cin.ignore();
+    getline(cin, root->meaning);
+
+
+    char ch = 'y';
+    do {
+        node *temp = root;
+        int flag = 0;
+
+        node *curr = new node();
+        cout << "\nEnter word for the next node: ";
+        cin >> curr->word;
+        cout << "\nEnter corresponding meaning for the next node: ";
+        cin.ignore();
+        getline(cin, curr->meaning);
+
+
+        while (flag == 0) {
+            if (curr->word < temp->word) {
+                if (temp->left == NULL) {
+                    temp->left = curr;
+                    flag = 1;
+                } else {
+                    temp = temp->left;
+                }
+            } else {
+                if (temp->right == NULL) {
+                    temp->right = curr;
+                    flag = 1;
+                } else {
+                    temp = temp->right;
+                }
+            }
+        }
+        cout << "\nDo you want to add more? (y/n)";
+        cin >> ch;
+    } while (ch == 'y');
 }
 
-void tree::inorder_r()
-{
-	inorder_r(root);
+void tree::inOrder() {
+    inOrder(root);
 }
 
-void tree::inorder_r(treenode *temp)
-{
-	if(temp != NULL)
-	{
-		inorder_r(temp->left);
-        cout<<temp->keyword<<":"<<temp->meaning<<"->";
-        inorder_r(temp->right);
-	}
+void tree::inOrder(node *root) {
+    if (root == NULL) {
+        return;
+    }
+
+    inOrder(root->left);
+
+    cout << "\nWord: " << root->word << ", Meaning: " << root->meaning;
+
+    inOrder(root->right);
 }
 
+void tree::levelWise() {
+    levelWise(root);
+}
 
-int main()
-{
-	tree bt;
-    int option;
-    do
-    {
-        cout<<"\n1.Create a Non-Recursive Tree";
-        cout<<"\n2.Inorder Transveral";
-        cout<<"\n3.Exit.";
-        cout<<"\nEnter your choice: ";
-        cin>>option;
-        switch(option)
-        {
-            case 1:
-                bt.create_nr();
-                break;
-                          
-            case 2: 
-                bt.inorder_r();
-                break;
-            
-            case 3:
-                return 0;
-                
-            default:
-                cout<<"\nInvalid Choice!";
-                break;
+void tree::levelWise(node *r) {
+    queue<node *> q;
+    node *temp = r;
+    q.push(temp);
+    cout << "\n-------------Level-Wise display--------------\n";
+    while (q.empty() != 1) {
+        temp = q.front();
+        q.pop();
+        cout << "Word: " << temp->word << ", Meaning: " << temp->meaning << "\n";
+        if (temp->left != NULL) {
+            q.push(temp->left);
+        }
+        if (temp->right != NULL) {
+            q.push(temp->right);
         }
     }
-    while(option != 4);
+
+}
+
+
+
+node *tree::copy() {
+    node *copied_root = copy(root);
+    return copied_root;
+}
+
+node *tree::copy(node *r) {
+    node *temp = NULL;
+    if (r != NULL) {
+        temp = new node();
+        temp->word = r->word;
+        temp->meaning = r->meaning;
+        temp->left = copy(r->left);
+        temp->right = copy(r->right);
+    }
+
+    return temp;
+}
+
+void tree::mirror() {
+    mirror(root);
+}
+
+void tree::mirror(node *root) {
+    if (root == NULL) {
+        return;
+    }
+
+    node *temp = root->left;
+    root->left = root->right;
+    root->right = temp;
+
+    mirror(root->left);
+    mirror(root->right);
+}
+
+void tree::deletion() {
+    string element;
+    cout << "\nEnter the word to be deleted: ";
+    cin >> element;
+    deletion_util(element);
+}
+
+void tree::deletion_util(string elt) {
+    if (root == NULL) {
+        return;
+    }
+    node *curr = root;
+    node *parent = NULL;
+    searchKey(&curr, elt, &parent);
+    if (curr != NULL) {
+        if (curr->left == NULL && curr->right == NULL) {    //Leaf Node
+            if (curr != root) {
+                if (parent->left == curr) {
+                    parent->left = NULL;
+                } else {
+                    parent->right = NULL;
+                }
+            } else {
+                root = NULL;
+            }
+            delete (curr);
+        } else if (curr->left != NULL && curr->right != NULL) {   //Two Child Nodes
+            node *successor = curr->right;
+            //Finding inorder successor
+            while (successor->left != NULL) {
+                successor = successor->left;
+            }
+            string val = successor->word;
+            deletion_util(successor->word);
+            curr->word = val;
+        } else {
+            node *child;
+            if (curr->left == NULL) {
+                child = curr->right;
+            } else {
+                child = curr->left;
+            }
+
+            if (curr != root) {
+                if (curr == parent->left) {
+                    parent->left = child;
+                } else {
+                    parent->right = child;
+                }
+            } else {
+                root = child;
+            }
+            delete (curr);
+        }
+    } else {
+        cout << "\nElement can't be found";
+        return;
+    }
+}
+
+void tree::searchKey(node **curr, string key, node **parent) {
+    while (*curr != nullptr && (*curr)->word != key) {
+        *parent = *curr;
+        if (key < (*curr)->word) {
+            *curr = (*curr)->left;
+        } else {
+            *curr = (*curr)->right;
+        }
+    }
+}
+
+int main() {
+    tree bst;
+    int option;
+    do {
+        cout << "\n\n------------------Menu-----------------------";
+        cout << "\n1.Create a Binary Search Tree";
+        cout << "\n2.Display the Binary Search Tree(Inorder)";
+        cout << "\n3.Display the Binary Search Tree(Level-Wise)";
+        cout << "\n4.Copy the tree and display it";
+        cout << "\n5.Display Mirror image of the tree";
+        cout << "\n6.Delete an element from the tree";
+        cout << "\n7.Exit";
+        cout << "\nEnter your choice: ";
+        cin >> option;
+        switch (option) {
+            case 1:
+                bst.create();
+                break;
+
+            case 2:
+                bst.inOrder();
+                break;
+
+            case 3:
+                bst.levelWise();
+                break;
+
+            case 4: {
+                node *cpyroot = bst.copy();
+                cout << "\n-------------Copied Tree---------------------";
+                bst.levelWise(cpyroot);
+                break;
+            }
+
+            case 5:
+
+                bst.mirror();
+                cout << "\n-------------Mirrored Tree-------------------";
+                bst.levelWise();
+                break;
+
+            case 6:
+                bst.deletion();
+                cout << "\n-------------Tree after Deletion-------------";
+                bst.levelWise();
+                break;
+
+            case 7:
+                return 0;
+
+            default:
+                cout << "\nInvalid Choice!";
+                break;
+        }
+    } while (option != 7);
 }
