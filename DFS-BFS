@@ -1,0 +1,314 @@
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+class gnode                                  //class gnode to store data of each node of the graph
+{
+    int id;
+    string username;
+    gnode *next;
+public:
+    gnode()
+    {
+        id=0;
+        username="\0";
+        next=NULL;
+    }
+    friend class graph;
+    friend class stack;
+    friend class queue;
+};
+
+class graph                                  //class graph to implement the facebook network
+{
+    int n;
+    gnode *head[10];
+public:
+    string name="\0";
+    graph()                                  //constructor to initiate network of friends
+    {
+        n=0;
+        cout<<"\nEnter the number of friends:- ";
+        cin>>n;
+        for(int i=1;i<=n;i++)
+        {
+            head[i]=new gnode;
+            head[i]->id=i;
+            cout<<"\nEnter the username of friend "<<i<<" :- "<<endl;
+            cin>>head[i]->username;
+        }
+    }
+    void create();
+    void display();
+    void display(gnode*);
+    void dfs();
+    void dfs_r(int,int *);
+    void dfs_nr(int);
+    void bfs();
+    void bfs_nr(int);
+};
+
+class stack                                       //stack data structure to implement dfs traversal of the graph
+{
+    int top=-1;
+    gnode *stk[20];
+public:
+
+    void push(gnode* ele)
+    {
+        if(isfull()==0)
+        {
+            top++;
+            stk[top]=ele;
+        }
+        else
+            cout<<"\nCannot add elements further. Stack is full.\n"<<endl;
+    }
+
+    gnode* pop()
+    {
+        if(isempty()==0)
+            return(stk[top--]);
+    }
+
+    int isfull()
+    {
+        if(top==19)
+            return 1;
+        else
+            return 0;
+    }
+
+    int isempty()
+    {
+        if(top==-1)
+            return 1;
+        else
+            return 0;
+    }
+};
+
+class queue                                     //queue data structure to implement bfs traversal of the graph
+{
+    int f,r;
+    gnode *que[20];
+public :
+    queue()
+    {
+        f=-1;
+        r=-1;
+    }
+
+    void enq(gnode *ele)
+    {
+        if(r==19)
+            cout<<"\nQueue is full."<<endl;
+        else
+        {
+            r++;
+            que[r]=ele;
+        }
+    }
+
+    gnode* deq()
+    {
+        if(f==r)
+            cout<<"\nQueue is empty."<<endl;
+        else
+        {
+            f++;
+            return (que[f]);
+        }
+    }
+
+    int isempty()
+    {
+        if(r==f)
+            return 1;
+        else
+            return 0;
+    }
+
+};
+
+void graph :: create()                                 //function to create graph using adjacency list
+{
+    gnode *temp, *curr;
+    int c;
+    char ch;
+    for(int i=1; i<=n; i++)
+    {
+        cout<<"Adjacency for friend :- "<<head[i]->username<<endl;
+        temp = head[i];
+        do
+        {
+            cout<<"\nEnter an id to link them to "<<head[i]->username<<" :- "<<endl;           //linking the nodes
+            cin>>c;
+            if(c == i)
+                cout<<"\nSelf-Link is not allowed"<<endl;
+            else
+            {
+                curr = new gnode();
+                curr->id = c;
+                curr->username = head[c]->username;
+                temp->next = curr;
+                temp = temp->next;
+            }
+            cout<<"\nWould you like to add another link ? (y/n):- "<<endl;
+            cin>>ch;                                                                //enables multiple links for the same node
+        } while(ch == 'y' || ch == 'Y');
+    }
+}
+
+void graph :: display()                              //driver function for display function
+{
+    cout<<"\nYour list of friends are :"<<endl;
+    for(int i=1; i<=n; i++)
+    {
+        cout<<head[i]->id<<" :- "<<head[i]->username;
+        display(head[i]->next);
+    }
+}
+
+void graph :: display(gnode* start)                     //function to display the graph nodes
+{
+    gnode *temp = start;
+    while(temp != NULL)
+    {
+        cout<<" ------> "<<temp->username;
+        temp = temp->next;
+    }
+    cout<<endl;
+}
+
+void graph :: dfs_nr(int i)                          //function for dfs non recursive traversal
+{
+    int visited[n];
+    for (int j = 0; j<n; j++) {
+        visited[j] = 0;
+    }
+    stack st;
+    st.push(head[i]);
+    visited[i] = 1;
+    gnode *temp;
+    do
+    {
+        temp = st.pop();
+        cout<<temp->id<<" :- "<<temp->username<<"\t";
+        while(temp != NULL)
+        {
+            if(visited[temp->id] == 0)
+            {
+                st.push(head[temp->id]);
+                visited[temp->id] = 1;
+            }
+            temp = temp->next;
+        }
+    } while (st.isempty() == 0);
+}
+
+void graph :: dfs_r(int s,int *visited)           //function for dfs recursive traversal
+{
+    cout<<s<<" :- "<<head[s]->username<<"\t";
+    visited[s] = 1;
+    gnode *temp = head[s]->next;
+    while(temp != NULL)
+    {
+        if(visited[temp->id] == 0)
+            dfs_r(temp->id, visited);
+        temp = temp->next;
+    }
+}
+
+void graph :: dfs()                                              //driver function for dfs traversals
+{
+    int id,ch;
+    cout<<"\nEnter the starting id:- "<<endl;
+    cin>>id;
+    cout<<"\nEnter Your choice\n1. Recursive\n2. Non-Recursive"<<endl;
+    cin>>ch;
+    if(ch==1)
+    {
+        int visited[n];
+        for(int j = 0; j < n; j++) {
+            visited[j] = 0;
+        }
+        dfs_r(id, visited);
+    }
+    else if(ch==2)
+    {
+        dfs_nr(id);
+    }
+
+}
+
+void graph :: bfs()                                     //driver function for bfs traversal
+{
+    int id;
+    cout<<"\nEnter the starting ID:- "<<endl;
+    cin>>id;
+    bfs_nr(id);
+}
+
+void graph :: bfs_nr(int a)             //function for bfs non recursive traversal
+{
+    int visited[n];
+    for(int j = 0; j < n; j++) {
+        visited[j] = 0;
+    }
+    queue q;
+    q.enq(head[a]);
+    visited[a] = 1;
+    gnode *temp;
+    do
+    {
+        temp = q.deq();
+        cout<<temp->id<<" :- "<<temp->username<<"\t";
+        while(temp != NULL)
+        {
+            if(visited[temp->id] == 0)
+            {
+                q.enq(head[temp->id]);
+                visited[temp->id] = 1;
+            }
+            temp = temp->next;
+        }
+    } while (q.isempty() != 1);
+}
+
+
+int main()
+{
+    graph g;
+    int ch;
+
+    do
+    {
+        cout<<"\n***** MENU ***"<<endl;
+        cout<<"\n1. CREATE\n2. DISPLAY\n3. DFS\n4. BFS\n5. EXIT"<<endl;
+        cout<<"\n********"<<endl;
+        cout<<"\nENTER YOUR CHOICE:- "<<endl;
+        cin>>ch;
+        switch(ch)
+        {
+            case 1:
+                g.create();
+                break;
+            case 2:
+                g.display();
+                break;
+            case 3:
+                g.dfs();
+                break;
+            case 4:
+                g.bfs();
+                break;
+            case 5:
+                break;
+            default:
+                cout<<"\nWrong choice."<<endl;
+        }
+    }while(ch!=5);
+
+    return 0;
+}
