@@ -1,0 +1,97 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Graph {
+	int adj[100][100];
+	int v;
+
+public:
+
+	Graph() {
+		cout << "\nEnter the number of vertices: ";
+		cin >> v;
+		for (int i = 0; i < v; i++) {
+			for (int j = 0; j < v; j++) {
+				adj[i][j] = INT_MAX;
+			}
+		}
+	}
+
+	void createGraph() {
+		cout << "\nEnter the number of edges: ";
+		int e;
+		cin >> e;
+		cout << "\nEnter the edges: \n";
+		for (int i = 0; i < e; i++) {
+			int v1, v2, wt;
+			cin >> v1 >> v2 >> wt;
+			adj[v1][v2] = wt;
+			adj[v2][v1] = wt;
+		}
+	}
+
+	void displayAdj() {
+		for (int i = 0; i < v; i++) {
+			for (int j = 0; j < v; j++) {
+				cout << adj[i][j] << " ";
+			}
+			cout << "\n";
+		}
+	}
+
+	void printMST(int parent[100]) {
+		cout << "\nEdge \tWeight\n";
+		for (int i = 1; i < v; i++)
+			cout << parent[i] << " - " << i << " \t" << adj[i][parent[i]] << " \n";
+	}
+
+	int findMin(int key[100], bool visited[100]) {
+		int min = INT_MAX, minIdx = -1;
+
+		for (int i = 0; i < v; i++) {
+			if (visited[i] == false && key[i] < min) {
+				min = key[i];
+				minIdx = i;
+			}
+		}
+		//cout << "\nmin: " << min << " minIdx: " << minIdx;
+		return minIdx;
+	}
+
+	void prims() {
+		int parent[100];
+		int key[100];
+		bool visited[100];
+
+		for (int i = 0; i < v; i++) {
+			key[i] = INT_MAX;
+			visited[i] = false;
+		}
+		key[0] = 0;
+		parent[0] = -1;
+
+		for (int i = 0; i < v - 1; i++) {
+			int u = findMin(key, visited);
+			visited[u] = true;
+			//cout << "\nu: " << u;
+
+			for (int j = 0; j < v; j++) {
+				if (adj[u][j] != INT_MAX && adj[u][j] < key[j] && visited[j] == false) {
+					key[j] = adj[u][j];
+					parent[j] = u;
+				}
+			}
+		}
+		printMST(parent);
+	}
+};
+
+int main() {
+	Graph* g = new Graph();
+	g->createGraph();
+	cout << "\nThe adj mat is: \n";
+	g->displayAdj();
+	cout << "\nMST is: \n";
+	g->prims();
+	return 0;
+}
