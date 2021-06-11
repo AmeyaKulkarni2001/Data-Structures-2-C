@@ -1,97 +1,103 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <cstring>
 using namespace std;
 
-class Graph {
-	int adj[100][100];
-	int v;
+int prims_algo()
+{
+    int n;
+    cout<<"\nEnter the total number of offices in all cities :- "<<endl;          //Accept the cost matrix
+    cin>>n;
+    int cost_mat[n][n];
+    cout<<"\nEnter the cost of telephone lines between specified cities.\n\n( If there is no line, please enter 999 as the cost. )"<<endl;
+    for(int i=0;i<n;i++)
+    {
+        for(int j=0;j<n;j++)
+        {
+            cout<<"\nCost between "<<i<<" and "<<j<<" is :- "<<endl;
+            cin>>cost_mat[i][j];
+        }
+    }
 
-public:
+    cout<<"\nThe cost matrix is:- "<<endl;                                         //display the cost matrix
+    for(int i=0;i<n;i++)
+    {
+        for(int j=0;j<n;j++)
+        {
+            cout<<"\t"<<cost_mat[i][j];
+        }
+        cout<<"\n"<<endl;
+    }
 
-	Graph() {
-		cout << "\nEnter the number of vertices: ";
-		cin >> v;
-		for (int i = 0; i < v; i++) {
-			for (int j = 0; j < v; j++) {
-				adj[i][j] = INT_MAX;
-			}
-		}
-	}
+    int st,nv;
+    int t[n-1][3];                                                             //t array to store visited nodes in the mst
+    int nearest[n];                                                           //nearest array to store previous node of all nodes
+    cout<<"\nEnter the starting city ID (IDs from 0 to n-1) :- "<<endl;
+    cin>>st;                                                                   //starting node in st
+    nearest[st] = -1;
+    cout<<"\nThe most efficient path is :- "<<endl;
+    int r=0;
+    int cost=0;
+    for(int i=0;i<n;i++)                                                      //initially, nearest of each vertex = starting vertex (except for starting vertex itself)
+    {
+        if(i!=st)
+            nearest[i]=st;
+    }
+    for(int i=0;i<n;i++)             //i loop for selecting the source vertex                                              //nested loop to calculate the minimum path to next node
+    {
+        int mini = 999;
+        for(int j=0;j<n;j++)        //j loop to select destination vertex
+        {
+            int l=nearest[j];
+            if(l != -1 && cost_mat[j][l] < mini)
+            {
+                mini = cost_mat[j][l];
+                nv = j;
+            }
+        }
+        t[r][0]=nearest[nv];                                               //store current and previous node and cost in t array
+        t[r][1]=nv;
+        t[r][2]=cost;
+        if(t[r][0]!=-1)
+            cout<<t[r][0]<<" ----> "<<t[r][1]<<endl;                       //print the visited minimum path
+        r++;
+        nearest[nv] = -1;
+        if(mini!=999)
+            cost=cost+mini;                                               //calculate minimum cost
+        for(int k=0;k<n;k++)                                                                                   //loop to select next node to be visited (considering the least cost each time)
+        {
+            if(nearest[k]!=-1 && cost_mat[k][nv] < cost_mat[k][nearest[k]])       
+            {
+                nearest[k]=nv;
+            }
+        }
+    }
+    return cost;
+}
 
-	void createGraph() {
-		cout << "\nEnter the number of edges: ";
-		int e;
-		cin >> e;
-		cout << "\nEnter the edges: \n";
-		for (int i = 0; i < e; i++) {
-			int v1, v2, wt;
-			cin >> v1 >> v2 >> wt;
-			adj[v1][v2] = wt;
-			adj[v2][v1] = wt;
-		}
-	}
+int main()
+{
+    int ch;
+    do
+    {
+        cout<<"\n************** MENU **************"<<endl;
+        cout<<"\n1. Display Route for minimum cost (Minimum cost Spanning Tree).\n2. Calculate Minimum Cost.\n3. Exit"<<endl;
+        cout<<"\n******************************"<<endl;
+        cout<<"\nEnter Your Choice :- "<<endl;
+        cin>>ch;
+        switch(ch)
+        {
+        case 1:
+            int min_cost;
+            min_cost=prims_algo();
+            break;
+        case 2:
+            cout<<"\nMinimum cost for telephone lines installation = "<<min_cost<<endl;
+            break;
+        case 3:
+            break;
+        default:
+            cout<<"\nWrong choice."<<endl;
+        }
+    }while(ch!=3);
 
-	void displayAdj() {
-		for (int i = 0; i < v; i++) {
-			for (int j = 0; j < v; j++) {
-				cout << adj[i][j] << " ";
-			}
-			cout << "\n";
-		}
-	}
-
-	void printMST(int parent[100]) {
-		cout << "\nEdge \tWeight\n";
-		for (int i = 1; i < v; i++)
-			cout << parent[i] << " - " << i << " \t" << adj[i][parent[i]] << " \n";
-	}
-
-	int findMin(int key[100], bool visited[100]) {
-		int min = INT_MAX, minIdx = -1;
-
-		for (int i = 0; i < v; i++) {
-			if (visited[i] == false && key[i] < min) {
-				min = key[i];
-				minIdx = i;
-			}
-		}
-		//cout << "\nmin: " << min << " minIdx: " << minIdx;
-		return minIdx;
-	}
-
-	void prims() {
-		int parent[100];
-		int key[100];
-		bool visited[100];
-
-		for (int i = 0; i < v; i++) {
-			key[i] = INT_MAX;
-			visited[i] = false;
-		}
-		key[0] = 0;
-		parent[0] = -1;
-
-		for (int i = 0; i < v - 1; i++) {
-			int u = findMin(key, visited);
-			visited[u] = true;
-			//cout << "\nu: " << u;
-
-			for (int j = 0; j < v; j++) {
-				if (adj[u][j] != INT_MAX && adj[u][j] < key[j] && visited[j] == false) {
-					key[j] = adj[u][j];
-					parent[j] = u;
-				}
-			}
-		}
-		printMST(parent);
-	}
-};
-
-int main() {
-	Graph* g = new Graph();
-	g->createGraph();
-	cout << "\nThe adj mat is: \n";
-	g->displayAdj();
-	cout << "\nMST is: \n";
-	g->prims();
-	return 0;
 }
